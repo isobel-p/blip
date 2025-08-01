@@ -3,6 +3,7 @@ import desktop_notifier
 import asyncio
 import dateparser
 import re
+import json
 
 @click.group()
 def cli():
@@ -30,18 +31,32 @@ def hi(special):
             click.echo("Hello")
 
 @click.command()
-@click.option("--title", prompt="title of notification", help="big notification title", required=True)
-@click.option("--message", prompt="message of notification", help="little notification message", required=True)
+@click.option("--title", prompt="title of blip", help="big notification title", required=True)
+@click.option("--message", prompt="message of blip", help="little notification message", required=True)
 @click.option("--urgency", default="normal", help="urgency of notification (low/normal/critical)")
-@click.option("--time", prompt="notification date & time", help="datetime of notification", required=True)
+@click.option("--time", prompt="blip date & time", help="datetime of notification", required=True)
 def new(title, message, urgency, time):
     dt = dateparser.parse(time)
     if dt == None:
         click.echo(click.BadParameter(f'{time} is not a valid date and/or time!'))
+        return
     else:
         click.echo(f"Parsed datetime: {dt}")
-    click.echo("Done")
-
+    # click.echo("Done")
+    try:
+        with open("blips.json", "r") as f:
+            alarms = json.load(f)
+    except Exception as e:
+        return click.echo(click.ClickException(e))
+    alarms.append({
+        "title": title,
+        "message": message,
+        "urgency": urgency,
+        "time": dt.isoformat(),
+    })
+    with open("blips.json", "w") as f:
+        json.dump(alarms, f, indent=2)
+    click.echo("new blip created successfully!")
 
 cli.add_command(hi)
 cli.add_command(new)
