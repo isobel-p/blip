@@ -58,6 +58,13 @@ def new(title, message, urgency, time):
         json.dump(alarms, f, indent=2)
     click.echo("new blip created successfully!")
 
+async def notify(blip_title, blip_message) -> None:
+    notifier = desktop_notifier.DesktopNotifier(app_name="blip")
+    await notifier.send(
+        title=blip_title,
+        message=blip_message,
+        sound=desktop_notifier.DEFAULT_SOUND
+    )
 cli.add_command(hi)
 cli.add_command(new)
 
