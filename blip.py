@@ -1,6 +1,8 @@
 import click
 import desktop_notifier
 import asyncio
+import dateparser
+import re
 
 @click.group()
 def cli():
@@ -27,7 +29,22 @@ def hi(special):
         case _:
             click.echo("Hello")
 
+@click.command()
+@click.option("--title", prompt="title of notification", help="big notification title", required=True)
+@click.option("--message", prompt="message of notification", help="little notification message", required=True)
+@click.option("--urgency", default="normal", help="urgency of notification (low/normal/critical)")
+@click.option("--time", prompt="notification date & time", help="datetime of notification", required=True)
+def new(title, message, urgency, time):
+    dt = dateparser.parse(time)
+    if dt == None:
+        click.echo(click.BadParameter(f'{time} is not a valid date and/or time!'))
+    else:
+        click.echo(f"Parsed datetime: {dt}")
+    click.echo("Done")
+
+
 cli.add_command(hi)
+cli.add_command(new)
 
 if __name__ == "__main__":
     cli()
